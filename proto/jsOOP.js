@@ -1,3 +1,4 @@
+
 var reflection = function(name, type) {
   this.name = name;
   this.type = type;
@@ -25,6 +26,13 @@ reflection.prototype.implements = function(interfaces) {
 reflection.prototype.extends = function(class) {
   return this;
 };
+reflection.prototype.getClass = function() {
+  if (!this.builder) {
+    this.builder = poojs.create(this);
+  }
+  return this.builder;
+};
+
 
 var accessor = function(value) {
   this.value = value;
@@ -59,6 +67,26 @@ accessor.prototype.final = function() {
   return this;
 };
 
+/** PSEUDO IMPL poojs **/
+var poojs = {
+  create: function(reflection) {
+    var constructor = function() {
+      // ???
+    };
+    constructor.prototype.constructor = constructor;
+    // instance getter
+    constructor.prototype.getClass = function() {
+      return reflection
+    };
+    // static getter
+    constructor.getClass = function() {
+      return reflection
+    };
+    return constructor;
+  }
+};
+
+/** API : **/
 module.exports = {
   Class: function(name, decl) {
     var ref = new reflection(name, reflection.CLASS);
