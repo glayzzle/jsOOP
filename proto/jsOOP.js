@@ -1,15 +1,87 @@
 var reflection = function(name, type) {
+  this.name = name;
+  this.type = type;
+};
+
+reflection.CLASS      = 1;
+reflection.INTERFACE  = 2;
+reflection.TRAIT      = 3;
+
+reflection.prototype.properties = function(items) {
+  return this;  
+};
+reflection.prototype.methods = function(items) {
+  return this;  
+};
+reflection.prototype.final = function() {
+  return this;  
+};
+reflection.prototype.abstract = function() {
+  return this;  
+};
+reflection.prototype.implements = function(interfaces) {
+  return this;  
+};
+reflection.prototype.extends = function(class) {
+  return this;
+};
+
+var accessor = function(value) {
+  this.value = value;
+};
+
+accessor.PUBLIC = 1;
+accessor.PROTECTED = 2;
+accessor.PRIVATE = 3;
+
+accessor.prototype.public = function() {
+  this.visibility = accessor.PUBLIC;
+  return this;
+};
+accessor.prototype.protected = function() {
+  this.visibility = accessor.PROTECTED;
+  return this;
+};
+accessor.prototype.private = function() {
+  this.visibility = accessor.PRIVATE;
+  return this;
+};
+accessor.prototype.abstract = function() {
+  this.abstract = true;
+  return this;
+};
+accessor.prototype.static = function() {
+  this.static = true;
+  return this;
+};
+accessor.prototype.final = function() {
+  this.final = true;
+  return this;
 };
 
 module.exports = {
-  Class: function(name) {
+  Class: function(name, decl) {
+    var ref = new reflection(name, reflection.CLASS);
+    if (decl) {
+      if (decl.hasOwnProperty('properties')) ref.properties(decl.properties);
+      if (decl.hasOwnProperty('methods')) ref.methods(decl.methods);
+    }
+    return ref;
   },
-  Interface: function(name) {
+  Interface: function(name, functions) {
+    var ref = new reflection(name, reflection.INTERFACE);
+    if (functions) {
+      ref.functions(functions);
+    }
+    return ref;
   },
   Trait: function(name) {
+    return new reflection(name, reflection.TRAIT);
   },
   fn: function(callback) {
+    return new accessor(callback);
   },
-  prop: function(callback) {
+  prop: function(default) {
+    return new accessor(default);
   }
 };
