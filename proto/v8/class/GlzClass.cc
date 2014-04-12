@@ -89,12 +89,14 @@ Handle<Value> GlzClass::Properties(const Arguments& args) {
         return scope.Close(v8::Object::New());
     }
 
-    Local<String> protectedKey = String::NewSymbol("protected");
     //Local<String> privateKey = String::NewSymbol("private");
+    Local<String> protectedKey = String::NewSymbol("protected");
     //Local<String> publicKey = String::NewSymbol("public");
 
     v8::Handle<v8::Object> classDefinition = args[0]->ToObject();
+    //v8::Local<v8::Value> privateProp = classDefinition->Get(privateKey);
     v8::Local<v8::Value> protectedProp = classDefinition->Get(protectedKey);
+    //v8::Local<v8::Value> publicProp = classDefinition->Get(publicKey);
 
     GlzClass* obj = ObjectWrap::Unwrap<GlzClass> (args.This());
 

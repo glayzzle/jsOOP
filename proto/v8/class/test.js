@@ -1,3 +1,11 @@
+/**
+ * Test reflection
+ *
+ * Build and run test :
+ *
+ *      sudo node-gyp configure && sudo node-gyp build && node test.js
+ */
+
 var addon = require('./build/Release/addon');
 var car = new addon.GlzClass('Car');
 car.properties({
