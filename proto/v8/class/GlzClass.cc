@@ -59,9 +59,10 @@ static void Log(v8::Local<v8::Value> value) {
 
 Handle<Value> CommonAccessorGetter (Local<String> property, const AccessorInfo& info)
 {
+    // Prevent recursion with SetNamedPropertyHandler
     printf("> Get: \n");
     Log(property);
-    return v8::Object::New();
+    return info.This()->Get(property);
 }
 
 void CommonAccessorSetter (Local<String> property, Local<Value> value, const AccessorInfo& info)
@@ -106,7 +107,10 @@ Handle<Value> GlzClass::Properties(const Arguments& args) {
             for (int i = 0; i < scopeDefinitionLen; i++) {
                 v8::Local<v8::Value> propertyName = scopeProps->Get(i);
                 //v8::Local<v8::Value> propertyValue = protectedDefinition->Get(propertyName);
-                args.This()->SetAccessor(propertyName->ToString(), getter, setter);
+
+                // SetNamedPropertyHandler ????
+                //args.This()->SetAccessor(propertyName->ToString(), getter, setter);
+                args.This()->SetAccessor(propertyName->ToString(), 0, setter);
             }
         }
     //GlzClass* obj = ObjectWrap::Unwrap<GlzClass> (args.This());
