@@ -11,18 +11,6 @@ GlzClass::GlzClass(double value) : value_(value) {
 GlzClass::~GlzClass() {
 }
 
-static v8::Handle<Value> GetTitle(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
-  // Extract the C++ request object from the JavaScript wrapper.
-  GlzClass* instance = node::ObjectWrap::Unwrap<GlzClass>(info.Holder());
-  return v8::String::New(instance->title.c_str());
-}
-// this.title=
-static void SetTitle(Local<String> property, Local<Value> value, const AccessorInfo& info) {
-  GlzClass* instance = node::ObjectWrap::Unwrap<GlzClass>(info.Holder());
-  v8::String::Utf8Value v8str(value);
-  instance->title = *v8str;
-}
-
 void GlzClass::Init(Handle<Object> exports) {
     // Prepare constructor template
     Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
@@ -38,8 +26,8 @@ void GlzClass::Init(Handle<Object> exports) {
             FunctionTemplate::New(Extends)->GetFunction()
             );
 
-    //this->tpl = tpl;
-
+    // Set a prototype method
+    //NODE_SET_PROTOTYPE_METHOD(tpl, "getName", Extends);
 
     constructor = Persistent<Function>::New(tpl->GetFunction());
     exports->Set(String::NewSymbol("GlzClass"), constructor);
@@ -80,6 +68,10 @@ void CommonAccessorSetter (Local<String> property, Local<Value> value, const Acc
 {
     printf("> Set: \n");
     Log(property);
+    //GlzClass* obj = GlzClass::Unwrap<GlzClass> (info.Holder());
+
+    // ForceSet = Bypass AccessorSetter handling
+    info.This()->ForceSet(property, value); // try info.Holder() ???
 }
 
 Handle<Value> GlzClass::Properties(const Arguments& args) {
@@ -90,40 +82,43 @@ Handle<Value> GlzClass::Properties(const Arguments& args) {
     }
 
     //Local<String> privateKey = String::NewSymbol("private");
-    Local<String> protectedKey = String::NewSymbol("protected");
+    //Local<String> protectedKey = String::NewSymbol("protected");
     //Local<String> publicKey = String::NewSymbol("public");
 
     v8::Handle<v8::Object> classDefinition = args[0]->ToObject();
-    //v8::Local<v8::Value> privateProp = classDefinition->Get(privateKey);
-    v8::Local<v8::Value> protectedProp = classDefinition->Get(protectedKey);
-    //v8::Local<v8::Value> publicProp = classDefinition->Get(publicKey);
 
-    GlzClass* obj = ObjectWrap::Unwrap<GlzClass> (args.This());
-
-    if(protectedProp->IsObject()) {
-        v8::Handle<v8::Object> protectedDefinition = protectedProp->ToObject();
-        v8::Handle<v8::Array> properties = protectedDefinition->GetPropertyNames();
-
+    if(classDefinition->IsObject()) {
         AccessorGetter getter = &CommonAccessorGetter;
         AccessorSetter setter = &CommonAccessorSetter;
+        v8::Handle<v8::Array> propScopes = classDefinition->GetPropertyNames();
+        int scopesLen = propScopes->Length();
 
-        int length = properties->Length();
-        for (int i = 0; i < length; i++) {
-            v8::Local<v8::Value> propertyName = properties->Get(i);
-            v8::Local<v8::Value> propertyValue = protectedDefinition->Get(propertyName);
-            args.This()->SetAccessor(propertyName->ToString(), getter, setter);
+        // Iterate object definition (private, protected, public)
+        for (int i = 0; i < scopesLen; i++) {
+            v8::Local<v8::Value> scopeKey = propScopes->Get(i);
+            v8::Local<v8::Value> scopeValue = classDefinition->Get(scopeKey);
+            v8::Handle<v8::Object> scopeDefinition = scopeValue->ToObject();
+            v8::Handle<v8::Array> scopeProps = scopeDefinition->GetPropertyNames();
+
+            int scopeDefinitionLen = scopeProps->Length();
+
+            // Iterate each scope
+            for (int i = 0; i < scopeDefinitionLen; i++) {
+                v8::Local<v8::Value> propertyName = scopeProps->Get(i);
+                //v8::Local<v8::Value> propertyValue = protectedDefinition->Get(propertyName);
+                args.This()->SetAccessor(propertyName->ToString(), getter, setter);
+            }
         }
-
-        return scope.Close(protectedDefinition);
+    //GlzClass* obj = ObjectWrap::Unwrap<GlzClass> (args.This());
+        return scope.Close(classDefinition);
     }
-
     return scope.Close(v8::Object::New());
 }
 
 Handle<Value> GlzClass::Extends(const Arguments& args) {
     HandleScope scope;
 
-    //GlzClass* obj = ObjectWrap::Unwrap<GlzClass > (args.This());
+    //GlzClass* obj = ObjectWrap::Unwrap<GlzClass > (args.Holder());
     //obj->value_ += 1;
 
     return scope.Close(v8::Object::New());
