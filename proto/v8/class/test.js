@@ -8,6 +8,18 @@
 
 var util = require('util');
 var addon = require('./build/Release/addon');
+var poo = new addon.Class();
+console.log('This is a : ' + poo);
+poo.foo = 'bar';
+if (!poo.foo) {
+  console.log('WTF !!!');
+}
+for(var i in poo) {
+  console.log('Read : ' + poo[i]);
+}
+console.log(util.inspect(poo, { showHidden: true, depth: null, colors: true }));
+console.log('--------------');
+
 var car = new addon.GlzClass('Car');
 car.properties({
     'private' : {

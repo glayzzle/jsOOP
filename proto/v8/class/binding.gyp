@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "addon",
-      "sources": [ "GlzClass.cc", "addon.cc" ]
+      "sources": [ "GlzClass.cc", "PooObject.cc", "addon.cc" ]
     }
   ]
 }
