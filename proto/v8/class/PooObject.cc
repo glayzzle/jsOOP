@@ -20,7 +20,7 @@ Persistent<Function> PooObject::ctor;
 void PooObject::Init(Handle<Object> exports) {
   Local<FunctionTemplate> tpl = FunctionTemplate::New(CtorNew);
   tpl->SetClassName(String::NewSymbol("PooClass"));
-  ctor = Persistent<Function>::New(tpl->GetFunction());
+  ctor = Persistent<PooObject>::New(tpl->GetFunction());
   exports->Set(String::NewSymbol("Class"), ctor);
 }
 
@@ -29,7 +29,7 @@ Handle<Value> PooObject::CtorNew(const Arguments& args) {
   HandleScope scope;
   if (args.IsConstructCall()) {
     // Invoked as constructor
-    return PooObject::New();
+    return args.This();
   } else {
     // Invoked as plain function, turn into construct call.
     return scope.Close(ctor->NewInstance());

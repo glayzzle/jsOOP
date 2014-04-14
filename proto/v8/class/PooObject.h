@@ -5,7 +5,7 @@
 
 using namespace v8;
 
-class PooObject : public Object {
+class PooObject : public Function {
   public:
     static Handle<Value> CtorNew(const Arguments& args);
     static void Init(Handle<Object> exports);
